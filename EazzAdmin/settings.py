@@ -27,10 +27,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['192.168.100.13']
 
-TIME_INPUT_FORMATS = [
-    '%I:%M %p',  # 6:22 PM
-]
-
 
 # Application definition
 
@@ -47,7 +43,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'allauth',
     'Authentication',
-    'RevenueRecords'
+    'RevenueRecords',
+    'ReceiptGeneration'
 ]
 
 MIDDLEWARE = [
