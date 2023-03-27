@@ -20,5 +20,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('Authentication/', include("Authentication.urls")),
     path('RevenueRecords/', include("RevenueRecords.urls")),
-    path('ReceiptGeneration/',include("ReceiptGeneration.urls"))
+    path('ReceiptGeneration/',include("ReceiptGeneration.urls")),
+    path('Products/',include('Products.urls'))
 ]

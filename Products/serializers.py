@@ -3,6 +3,7 @@ from django.db import models
 
 from .models import Product,ProductDatabase
 from Authentication.serializers import UserSerializer
+from Authentication.models import Account
 
 class ProductsSerializers(serializers.ModelSerializer):
     class Meta:
@@ -20,7 +21,7 @@ class GetProductsSerializers(serializers.ModelSerializer):
         fields = '__all__'
 
 class DatabaseSerializers(serializers.ModelSerializer):
-    products = ProductsSerializers(read_only=True)
+    products = ProductsSerializers(many=True)
     class Meta:
         model = ProductDatabase
         fields = '__all__'
@@ -36,8 +37,6 @@ class DatabaseSerializers(serializers.ModelSerializer):
                 item_name = product_data.get('item_name'),
                 item_price = product_data.get('item_price'),
             )
-            
             database.products.add(products)
-            database.admin.add(request.user)
             database.save()
         return database

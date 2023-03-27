@@ -50,6 +50,7 @@ class Account(AbstractBaseUser,PermissionsMixin):
     username = models.CharField(max_length=30,unique=True)
     company = models.TextField(null=True)
     employee_id = models.CharField(max_length=16,null=True)
+    admin = models.IntegerField(null=True)
     server_code = models.CharField(max_length=10,null=True)
     confirm_start_shift = models.BooleanField(default=False) 
     on_shift = models.BooleanField(default=False)
