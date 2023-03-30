@@ -31,4 +31,11 @@ def Products(request):
     else:
         product_serializer.errors
         return Response(data="Error",status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(["GET"])
+def getProductDatabases(request):
+    data = {}
+    db = ProductDatabase.objects.all() 
+    data = GetProductDatabaseSerializers(db,many=True).data
+    return Response(data,status=status.HTTP_200_OK)
 

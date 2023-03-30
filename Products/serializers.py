@@ -1,9 +1,18 @@
 from rest_framework import serializers
 from django.db import models
 
-from .models import Product,ProductDatabase
-from Authentication.serializers import UserSerializer
-from Authentication.models import Account
+from .models import Product,ProductDatabase,Employees
+
+
+class EmployeeSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Employees
+        fields = ['id','employee']
+    
+    def save(self):
+        employee = Employees(employee=self.validated_data['employee'])
+        employee.save()
+        return employee
 
 class ProductsSerializers(serializers.ModelSerializer):
     class Meta:
@@ -21,16 +30,26 @@ class GetProductsSerializers(serializers.ModelSerializer):
         fields = '__all__'
 
 class DatabaseSerializers(serializers.ModelSerializer):
+    employees = EmployeeSerializers(many=True)
     products = ProductsSerializers(many=True)
     class Meta:
         model = ProductDatabase
         fields = '__all__'
 
     def create(request,validated_data):
+        employees_data = validated_data.pop('employees')
         products_data = validated_data.pop('products')
         database = ProductDatabase.objects.create(
             **validated_data
         )
+        
+        for employee_data in employees_data:
+            employees = Employees.objects.create(
+                employee = employee_data.get('employee')
+            ),
+
+            database.employees.set(employees)
+            database.save()
         for product_data in products_data:
             products = Product.objects.create(
                 item_number = product_data.get('item_number'),
@@ -40,3 +59,10 @@ class DatabaseSerializers(serializers.ModelSerializer):
             database.products.add(products)
             database.save()
         return database
+
+class GetProductDatabaseSerializers(serializers.ModelSerializer):
+    employees = EmployeeSerializers(many=True)
+    products = ProductsSerializers(many=True)
+    class Meta:
+        model = ProductDatabase
+        fields = '__all__'

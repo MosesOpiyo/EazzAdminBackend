@@ -21,6 +21,8 @@ class Receipt(models.Model):
     server = models.IntegerField(null=True)
     server_name = models.CharField(max_length=40,null=True)
     items = models.ManyToManyField(Item)
+    sub_total = models.IntegerField(null=True)
+    VAT = models.IntegerField(null=True)
     total = models.IntegerField(null=True)
 
     def __str__(self):
