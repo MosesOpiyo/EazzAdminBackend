@@ -57,11 +57,10 @@ def importExcel(request):
             new_products = request.FILES['my_file']
             imported_data = dataset.load(new_products.read(),format='xlsx')
             for data in imported_data:
-                values = Product(
-                   data[0],
-                   data[1],
-                   data[2],
-                   data[3]
+                values = Product.objects.create(
+                   item_number = data[0],
+                   item_name = data[1],
+                   item_price = data[2]
                 )
                 values.save()
                 db.products.add(values)
