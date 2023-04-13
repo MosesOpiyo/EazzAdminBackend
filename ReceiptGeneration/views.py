@@ -11,34 +11,38 @@ from .models import *
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def getProduct(request,pk,number):
-    data = {}
-    db = ProductDatabase.objects.get(id=pk)
+def getProduct(request,id,number):
+    db = ProductDatabase.objects.get(id=request.user.establishment)
+    
     if db.employees.filter(employee=request.user.employee_id).exists:
         product = db.products.get(item_number=number)
-        data = GetProductsSerializers(product).data
+        receipt = Receipt.objects.get(id=id)
+        item = Item.objects.create(
+            item_number = product.item_number,
+            name = product.item_name,
+            price = product.item_price
+        )
+        receipt.items.add(item)
+        receipt_items = receipt.items
+        data = GetItemsSerializers(receipt_items,many=True).data
         return Response(data,status=status.HTTP_200_OK)
     else:
         data = "Access to database denied"
         return Response(data,status=status.HTTP_401_UNAUTHORIZED)
 
 
-@api_view(["POST"])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def ReceiptView(request):
     data = {}
-    receipt_serializer = ReceiptSerializers(data=request.data)
 
-    if receipt_serializer.is_valid(): 
-        receipt_serializer.validated_data['server'] = request.user.id
-        receipt_serializer.save()
-        receipt = Receipt.objects.filter(server_name=request.user.username).order_by('-published')[0]
-        data = GetReceiptSerializers(receipt).data
-        return Response(data,status=status.HTTP_201_CREATED)
-    else:
-        data = receipt_serializer.errors
-        return Response(data,status=status.HTTP_400_BAD_REQUEST)
-
+    receipt = Receipt.objects.create(
+        server = request.user.id,
+        server_name = request.user.username 
+    )
+    data = receipt.id
+    return Response(data,status=status.HTTP_201_CREATED)
+    
 @api_view(["DElETE"])   
 @permission_classes([IsAuthenticated])
 def NewReceipt():
