@@ -45,7 +45,9 @@ INSTALLED_APPS = [
     'Authentication',
     'RevenueRecords',
     'ReceiptGeneration',
-    'Products'
+    'Products',
+    'Employees',
+    'import_export'
 ]
 
 MIDDLEWARE = [

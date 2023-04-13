@@ -21,5 +21,6 @@ urlpatterns = [
     path('Authentication/', include("Authentication.urls")),
     path('RevenueRecords/', include("RevenueRecords.urls")),
     path('ReceiptGeneration/',include("ReceiptGeneration.urls")),
-    path('Products/',include('Products.urls'))
+    path('Products/',include('Products.urls')),
+    path('Employee/',include('Employees.urls'))
 ]
