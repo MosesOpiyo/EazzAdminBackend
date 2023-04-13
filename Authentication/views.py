@@ -11,10 +11,14 @@ from .models import *
 def registration_view(request):
     
     serializer = RegistrationSerializer(data=request.data)
+    admin_serializer = AdminRegistrationSerializer(data=request.data)
     data = {}
 
-    if serializer.is_valid():
-        account = serializer.save()
+    if serializer.is_valid() and admin_serializer.is_valid():
+        if request.user.is_authenticated:
+           account = serializer.save(request=request)
+        else:
+           account = admin_serializer.save()  
         data['response'] = f"Successfully created a new user under {account.username} with email {account.email}"
         return Response(data,status = status.HTTP_201_CREATED)
     else:

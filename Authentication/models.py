@@ -48,10 +48,10 @@ class Account(AbstractBaseUser,PermissionsMixin):
     """
     email = models.EmailField(verbose_name="email",max_length=100,unique=True,null=True)
     username = models.CharField(max_length=30,unique=True)
-    company = models.TextField(null=True)
-    employee_id = models.CharField(max_length=16,null=True)
-    admin = models.IntegerField(null=True)
+    employee_id = models.CharField(max_length=16,null=True,unique=True)
+    admin = models.CharField(max_length=20,null=True)
     server_code = models.CharField(max_length=10,null=True)
+    establishment = models.CharField(max_length=10,null=True)
     confirm_start_shift = models.BooleanField(default=False) 
     on_shift = models.BooleanField(default=False)
     confirm_end_shift = models.BooleanField(default=False)
