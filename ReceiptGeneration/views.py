@@ -30,6 +30,14 @@ def getProduct(request,id,number):
         data = "Access to database denied"
         return Response(data,status=status.HTTP_401_UNAUTHORIZED)
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def GetReceipt(request,id):
+    data = {}
+
+    receipt = Receipt.objects.get(id=id)
+    data = GetReceiptSerializers(receipt).data
+    return Response(data,status=status.HTTP_200_OK)
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -45,7 +53,7 @@ def ReceiptView(request):
     
 @api_view(["DElETE"])   
 @permission_classes([IsAuthenticated])
-def NewReceipt():
+def ProducedReceipt():
     receipt = Receipt.objects.all()
     receipt.delete() 
     
@@ -54,6 +62,7 @@ def NewReceipt():
 def ReceiptItems(request,pk):
     data = {}
     total = []
+    sales = request.user.sales
     item_serializer = ItemsSerializers(data=request.data,many=True)
     receipt = Receipt.objects.get(pk=pk)
     if item_serializer.is_valid():
@@ -63,6 +72,7 @@ def ReceiptItems(request,pk):
         for item in Item.objects.all():
             total.append(item.price)
             receipt.total = sum(total)
+            request.user.sales = sales + receipt.total
         receipt.save()
         data = GetReceiptSerializers(receipt).data
     return Response(data,status=status.HTTP_202_ACCEPTED)

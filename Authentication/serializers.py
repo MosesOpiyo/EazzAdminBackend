@@ -30,7 +30,7 @@ class AdminRegistrationSerializer(serializers.ModelSerializer):
         }
 
     def save(self):
-        account = Account(email=self.validated_data['email'],username = self.validated_data['username'],employee_id=binascii.hexlify(os.urandom(8)).decode(),server_code=binascii.hexlify(os.urandom(10)).decode())
+        account = Account(email=self.validated_data['email'],username = self.validated_data['username'],employee_id=binascii.hexlify(os.urandom(8)).decode(),server_code=binascii.hexlify(os.urandom(10)).decode(),is_company_admin=True,code=binascii.hexlify(os.urandom(10)).decode())
         account.set_password(self.validated_data['password'])
         print(f"New user,{account.username} has been created with email {account.email}")
         account.save()

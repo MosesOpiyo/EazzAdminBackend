@@ -16,6 +16,6 @@ class RecordSerializer(serializers.ModelSerializer):
         return record
     
 class GetRecordSerializer(serializers.ModelSerializer):
-    account = UserSerializer(read_only=True)
     class Meta:
-        fieds = '__all__'
+        model = RevenueRecord
+        fields = ['amount','percent','increased']

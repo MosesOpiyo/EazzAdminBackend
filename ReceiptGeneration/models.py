@@ -17,7 +17,7 @@ class Item(models.Model):
 class Receipt(models.Model):
     id = models.AutoField(primary_key=True)
     published = models.DateTimeField(default = datetime.now)
-    receipt_number = models.CharField(max_length=6,null=True)
+    receipt_number = models.CharField(max_length=12,null=True)
     server = models.IntegerField(null=True)
     server_name = models.CharField(max_length=40,null=True)
     items = models.ManyToManyField(Item)
@@ -26,7 +26,7 @@ class Receipt(models.Model):
     total = models.IntegerField(null=True)
 
     def __str__(self):
-        return self.receipt_number
+        return self.receipt_number 
     
     def save(self, *args, **kwargs):
         if not self.receipt_number:

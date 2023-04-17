@@ -2,9 +2,12 @@ from django.db import models
 from Authentication.models import Account
 
 class RevenueRecord(models.Model):
-    account = models.OneToOneField(Account,on_delete=models.CASCADE)
+    account = models.ForeignKey(Account,on_delete=models.CASCADE)
+    week = models.IntegerField(null=True)
     amount = models.IntegerField(null=True)
+    percent = models.IntegerField(null=True)
+    increased = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.account.username
+        return str(self.week) 
    

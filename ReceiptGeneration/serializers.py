@@ -40,11 +40,12 @@ class ReceiptSerializers(serializers.ModelSerializer):
             receipt.items.add(items)
             receipt.save()
         return receipt
-            
-            
-            
 
-
+class GetEmployeeSalesSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Receipt
+        fields = ['total']          
+            
 class GetReceiptSerializers(serializers.ModelSerializer):
     items = ItemsSerializers(many=True)
     class Meta:
