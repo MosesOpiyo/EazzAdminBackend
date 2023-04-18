@@ -2,7 +2,7 @@ from django.db import models
 
 class Product(models.Model):
     item_number = models.IntegerField(null=True)
-    item_name = models.CharField(max_length=500,null=True)
+    item_name = models.TextField(null=True)
     item_price = models.IntegerField(null=True)
     
     def __str__(self):

@@ -20,7 +20,7 @@ class ProductsSerializers(serializers.ModelSerializer):
         fields = '__all__'
 
     def save(self):
-        product = Product(item_number=self.validated_data['item_number'],item_name=self.validated_data['item_name'],item_price=self.validated_data['item_price'])
+        product = Product.objects.create(item_number=self.validated_data['item_number'],item_name=self.validated_data['item_name'],item_price=self.validated_data['item_price'])
         product.save
         return product
     

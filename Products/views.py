@@ -27,7 +27,8 @@ def Products(request):
     product_serializer = ProductsSerializers(data=request.data)
 
     if product_serializer.is_valid():
-        product_serializer.save()
+        product = product_serializer.save()
+        print(GetProductsSerializers(product).data)
         return Response(data="Product added",status=status.HTTP_201_CREATED)
     else:
         product_serializer.errors
@@ -38,7 +39,7 @@ def getProductDatabases(request):
     data = {}
     db = ProductDatabase.objects.get(id=request.user.establishment)
     if db.employees.filter(employee=request.user.employee_id).exists and request.user.is_authenticated:
-        data = GetProductDatabaseSerializers(db).data
+        data = GetProductsSerializers(db.products,many=True).data
         return Response(data,status=status.HTTP_200_OK)
     else:
         data = "Access unauthorized"
@@ -72,3 +73,29 @@ def importExcel(request):
     else:
         data="UNAUTHORIZED"
         return Response(data,status=status.HTTP_401_UNAUTHORIZED)
+    
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def addProducts(request):
+    data = {}
+    product_serializers = ProductsSerializers(data=request.data)
+    db = ProductDatabase.objects.get(id=request.user.establishment)
+    
+    if product_serializers.is_valid():
+        if db.employees.filter(employee=request.user.employee_id).exists:
+          product = product_serializers.save()
+          
+          data = "Product added"
+          return Response(data,status=status.HTTP_201_CREATED)
+        else:
+            data = "Unauthorized"
+            return Response(data,status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        data = product_serializers.errors
+        return Response(data,status=status.HTTP_400_BAD_REQUEST)
+
+
+        
+        
+        
+
