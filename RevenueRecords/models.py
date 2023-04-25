@@ -11,3 +11,4 @@ class RevenueRecord(models.Model):
     def __str__(self):
         return str(self.week) 
    
+ 

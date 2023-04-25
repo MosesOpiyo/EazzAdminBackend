@@ -50,29 +50,14 @@ def getProductDatabases(request):
 @permission_classes([IsAuthenticated])
 def importExcel(request):
     data = {}
-    if request.user.is_authenticated:
-        db = ProductDatabase.objects.get(id=request.user.establishment)
-        if db.employees.filter(employee=request.user.employee_id).exists:
-            product_resource = ProductsResources()
-            dataset = Dataset()
-            new_products = request.FILES['my_file']
-            imported_data = dataset.load(new_products.read(),format='xlsx')
-            for data in imported_data:
-                values = Product.objects.create(
-                   item_number = data[0],
-                   item_name = data[1],
-                   item_price = data[2]
-                )
-                values.save()
-                db.products.add(values)
-            data=GetProductDatabaseSerializers(db).data
-            return Response(data,status=status.HTTP_201_CREATED)
-        else:
-            data="UNAUTHORIZED"
-            return Response(data,status=status.HTTP_401_UNAUTHORIZED) 
+    product_serializer = ProductsSerializers(data=request.data,many=True)
+
+    if product_serializer.is_valid():
+        product = product_serializer.save()
+        return Response(data="Product added",status=status.HTTP_201_CREATED)
     else:
-        data="UNAUTHORIZED"
-        return Response(data,status=status.HTTP_401_UNAUTHORIZED)
+        product_serializer.errors
+        return Response(data="Error",status=status.HTTP_400_BAD_REQUEST)
     
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -82,9 +67,11 @@ def addProducts(request):
     db = ProductDatabase.objects.get(id=request.user.establishment)
     
     if product_serializers.is_valid():
+        product_serializers.save()
         if db.employees.filter(employee=request.user.employee_id).exists:
-          product = product_serializers.save()
-          
+          new_product = Product.objects.get(item_number = product_serializers.data['item_number'])
+          db.products.add(new_product)
+          db.save()
           data = "Product added"
           return Response(data,status=status.HTTP_201_CREATED)
         else:

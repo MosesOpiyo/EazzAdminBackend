@@ -5,6 +5,6 @@ urlpatterns = [
     path("Products",views.databaseCreation,name="products"),
     path("GetProducts",views.getProductDatabases,name="get"),
     path("ImportData",views.importExcel,name="import_data"),
-    path("AddProduct",views.Products,name="new_product")
+    path("AddProduct",views.addProducts,name="new_product")
    
 ]

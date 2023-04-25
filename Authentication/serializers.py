@@ -13,7 +13,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     def save(self,request):
         if request.user:
-            account = Account(email=self.validated_data['email'],username = self.validated_data['username'],employee_id=binascii.hexlify(os.urandom(8)).decode(),server_code=binascii.hexlify(os.urandom(10)).decode(),admin=request.user.employee_id)
+            account = Account(email=self.validated_data['email'],username = self.validated_data['username'],employee_id=binascii.hexlify(os.urandom(8)).decode(),server_code=binascii.hexlify(os.urandom(10)).decode(),admin=request.user.employee_id,customers=0,sales=0)
         else:
             account = Account(email=self.validated_data['email'],username = self.validated_data['username'],employee_id=binascii.hexlify(os.urandom(8)).decode(),server_code=binascii.hexlify(os.urandom(10)).decode())
         account.set_password(self.validated_data['password'])

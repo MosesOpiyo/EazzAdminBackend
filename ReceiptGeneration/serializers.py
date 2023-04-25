@@ -50,4 +50,4 @@ class GetReceiptSerializers(serializers.ModelSerializer):
     items = ItemsSerializers(many=True)
     class Meta:
         model = Receipt
-        fields = ['id','receipt_number','server','server_name','total','items']
+        fields = ['id','receipt_number','published','server','server_name','total','items']
