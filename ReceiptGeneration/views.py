@@ -6,7 +6,8 @@ from Products.models import Product,ProductDatabase
 from Products.serializers import GetProductsSerializers
 from datetime import date
 
-from RevenueRecords.views import RecordView
+
+from RevenueRecords.models import RevenueRecord
 from .serializers import *
 from .models import *
 
@@ -70,23 +71,28 @@ def ReceiptView(request):
 def NewReceipt(request,id):
     total = []
     data = {}
+    my_date = date.today()
+    year, week_num, day_of_week = my_date.isocalendar()
    
     receipt = Receipt.objects.get(id=id) 
     for item in receipt.items.all():
         total.append(item.price)
     receipt.total = sum(total)
     receipt.save()
-    employee_receipts = Receipt.objects.filter(server=receipt.server)
-    employee = Account.objects.get(server_code=receipt.server)
-    for receipt in employee_receipts:
-        total.append(receipt.total)
-        new_total = sum(total) 
-    employee.sales = new_total - receipt.total
-    employee.customers = employee.customers + 1
-    employee.save()
     data = GetReceiptSerializers(receipt).data
     return Response(data,status=status.HTTP_201_CREATED)
-    
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def EmployeeSales(request,id):
+    employee = Account.objects.get(id=request.user.id)
+    receipt = Receipt.objects.get(id=id)
+    employee.customers = employee.customers + 1
+    prev_sales = employee.sales
+    new_sales = prev_sales + receipt.total
+    employee.sales = new_sales
+    employee.save()
+    return Response(data="Accepted",status=status.HTTP_202_ACCEPTED)
 
 @api_view(["GET"])   
 @permission_classes([IsAuthenticated])
@@ -96,6 +102,9 @@ def CheckReceipt(request):
     receipts = Receipt.objects.filter(server=request.user.server_code)
     for receipt in receipts:
         if receipt.week != week_num:
+            account = Account.objects.get(id=request.user.id)
+            account.sales = 0
+            account.customers = 0
             receipts.delete()
         else:
             return True

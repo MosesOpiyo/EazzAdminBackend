@@ -1,9 +1,10 @@
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
 from rest_framework import status
-import datetime
+from django.utils import timezone
+import pytz
+from datetime import date
 
 from ReceiptGeneration.models import Receipt
 from .serializers import *
@@ -14,17 +15,17 @@ from .models import *
 def RecordView(request,id):
     data = {}
 
-    my_date = datetime.date.today() 
+    my_date = date.today() 
     year, week_num, day_of_week = my_date.isocalendar()
     receipt = Receipt.objects.get(id=id)
     admin = Account.objects.get(employee_id=request.user.admin)
     records = RevenueRecord.objects.all()
     for record in records:
         if record.account == admin and record.week == week_num:
-            print("Receipt Amount:", receipt.total)
+            record.amount = record.amount + receipt.total
             record.save()
             overall_increase(increase=receipt.total, request=request)
-            data = f"Amount {receipt.total} added"
+            data =  GetRecordSerializer(record).data
             return Response(data,status=status.HTTP_200_OK) 
         
     new_record = RevenueRecord.objects.create(account=admin,week=week_num,amount=0)
@@ -48,7 +49,7 @@ def get_all_record(request):
 @permission_classes([IsAuthenticated])
 def get_record(request):
     data = {}
-    my_date = datetime.date.today() 
+    my_date = date.today() 
     year, week_num, day_of_week = my_date.isocalendar()
     admin = Account.objects.get(id=request.user.id)
     record = RevenueRecord.objects.get(account=admin, week=week_num - 1)
@@ -57,7 +58,7 @@ def get_record(request):
      
 @api_view(["GET"])
 def increase_or_decrease(request):
-    my_date = datetime.date.today() 
+    my_date = date.today()  
     year, week_num, day_of_week = my_date.isocalendar()
 
     data = {}
@@ -85,7 +86,7 @@ def increase_or_decrease(request):
     
 @api_view(["GET"])
 def increase_or_decrease_for_employee(request):
-    my_date = datetime.date.today() 
+    my_date = date.today()  
     year, week_num, day_of_week = my_date.isocalendar()
 
     data = {}
@@ -113,9 +114,9 @@ def increase_or_decrease_for_employee(request):
     
 
 @permission_classes([IsAuthenticated])
-def overall_increase(increase,request):
+def overall_increase(id,request):
     data = {}
-    my_date = datetime.date.today() 
+    my_date = date.today()  
     year, week_num, day_of_week = my_date.isocalendar()
     admin = Account.objects.get(employee_id=request.user.admin)
     record = RevenueRecord.objects.get(account=admin, week=week_num)
