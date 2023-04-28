@@ -23,6 +23,7 @@ class Receipt(models.Model):
     server_name = models.CharField(max_length=40,null=True)
     items = models.ManyToManyField(Item)
     sub_total = models.IntegerField(null=True)
+    overseer = models.CharField(max_length=20,null=True)
     VAT = models.IntegerField(null=True)
     total = models.IntegerField(null=True)
     day = models.IntegerField(null=True)

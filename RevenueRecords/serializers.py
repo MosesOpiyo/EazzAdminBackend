@@ -19,3 +19,4 @@ class GetRecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = RevenueRecord
         fields = ['week','amount','percent','increased']
+

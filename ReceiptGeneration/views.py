@@ -52,6 +52,25 @@ def GetEmployeeReceipts(request):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
+def GetEmployeeLatest(request):
+    data = {}
+
+    receipt = Receipt.objects.filter(overseer=request.user.employee_id).latest('id')
+    data = GetReceiptSerializers(receipt).data
+    return Response(data,status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def GetEmployeeLatestReceipt(request):
+    data = {}
+
+    receipt = Receipt.objects.filter(overseer=request.user.employee_id).latest('id')
+    data = GetReceiptSerializers(receipt).data
+    return Response(data,status=status.HTTP_200_OK)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def ReceiptView(request):
     data = {}
 
@@ -60,6 +79,7 @@ def ReceiptView(request):
     receipt = Receipt.objects.create(
         server = request.user.server_code,
         server_name = request.user.username,
+        overseer = request.user.admin,
         day = day_of_week,
         week = week_num
     )

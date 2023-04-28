@@ -23,8 +23,10 @@ def RecordView(request,id):
     for record in records:
         if record.account == admin and record.week == week_num:
             record.amount = record.amount + receipt.total
+            record.increase = 0
+            increase = (receipt.total / record.amount)
+            record.increase = increase * 100
             record.save()
-            overall_increase(increase=receipt.total, request=request)
             data =  GetRecordSerializer(record).data
             return Response(data,status=status.HTTP_200_OK) 
         
@@ -113,20 +115,6 @@ def increase_or_decrease_for_employee(request):
         return Response(data,status=status.HTTP_200_OK)
     
 
-@permission_classes([IsAuthenticated])
-def overall_increase(id,request):
-    data = {}
-    my_date = date.today()  
-    year, week_num, day_of_week = my_date.isocalendar()
-    admin = Account.objects.get(employee_id=request.user.admin)
-    record = RevenueRecord.objects.get(account=admin, week=week_num)
-    if record:
-        record.save()
-        data = GetRecordSerializer(record).data
-        return Response(data,status=status.HTTP_202_ACCEPTED)
-    else:
-        data = "Record doesn't exist"
-        return Response(data,status=status.HTTP_404_NOT_FOUND)
 
     
 

@@ -3,6 +3,8 @@ import os
 from rest_framework import serializers
 from .models import Account,Profile
 
+from Products.models import *
+
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
@@ -13,7 +15,12 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     def save(self,request):
         if request.user:
-            account = Account(email=self.validated_data['email'],username = self.validated_data['username'],employee_id=binascii.hexlify(os.urandom(8)).decode(),server_code=binascii.hexlify(os.urandom(10)).decode(),admin=request.user.employee_id,customers=0,sales=0)
+            account = Account(email=self.validated_data['email'],username = self.validated_data['username'],employee_id=binascii.hexlify(os.urandom(8)).decode(),server_code=binascii.hexlify(os.urandom(10)).decode(),admin=request.user.employee_id,establishment=request.user.establishment,customers=0,sales=0)
+            employee = Employees.objects.create(employee=account.employee_id)
+            employee.save()
+            db = ProductDatabase.objects.get(id=request.user.establishment)
+            db.employees.add(employee)
+            db.save()
         else:
             account = Account(email=self.validated_data['email'],username = self.validated_data['username'],employee_id=binascii.hexlify(os.urandom(8)).decode(),server_code=binascii.hexlify(os.urandom(10)).decode())
         account.set_password(self.validated_data['password'])
