@@ -31,6 +31,8 @@ def EmployeeSales(request):
    else:
        data = "Access Unauthorized"
        return Response(data,status=status.HTTP_401_UNAUTHORIZED)
+   
+   
 
 
 
