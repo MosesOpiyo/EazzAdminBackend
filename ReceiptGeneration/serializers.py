@@ -18,7 +18,7 @@ class ItemsSerializers(serializers.ModelSerializer):
 class GetItemsSerializers(serializers.ModelSerializer):
     class Meta:
         model = Item
-        fields = '__all__'
+        fields = ['item_number','name','price']
 
 class ReceiptSerializers(serializers.ModelSerializer):
     items = ItemsSerializers(many=True)
@@ -47,7 +47,7 @@ class GetEmployeeSalesSerializers(serializers.ModelSerializer):
         fields = ['total']          
             
 class GetReceiptSerializers(serializers.ModelSerializer):
-    items = ItemsSerializers(many=True)
+    items = GetItemsSerializers(many=True)
     class Meta:
         model = Receipt
-        fields = ['id','receipt_number','published','server','server_name','total','items']
+        fields = ['receipt_number','store_name','server_name','total','items']

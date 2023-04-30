@@ -75,10 +75,12 @@ def ReceiptView(request):
     data = {}
 
     my_date = date.today()
+    store = ProductDatabase.objects.get(id=request.user.establishment)
     year, week_num, day_of_week = my_date.isocalendar()
     receipt = Receipt.objects.create(
         server = request.user.server_code,
         server_name = request.user.username,
+        store_name = store.establishment,
         overseer = request.user.admin,
         day = day_of_week,
         week = week_num
