@@ -6,12 +6,6 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 
 class MyAccountManager(BaseUserManager):
-    """defines the methods to manage the custom user to be created
-    Args:
-        BaseUserManager ([type]): [description]
-    Returns:
-        [type]: [description]
-    """
     def create_user(self,email,username,password=None):
         if not email:
             raise ValueError("Users must have and email address")
@@ -42,10 +36,6 @@ class MyAccountManager(BaseUserManager):
         return user
 
 class Account(AbstractBaseUser,PermissionsMixin):
-    """This will define the custom user model to be used
-    Args:
-        AbstractBaseUser ([type]): [description]
-    """
     email = models.EmailField(verbose_name="email",max_length=100,unique=True,null=True)
     username = models.CharField(max_length=30,unique=True)
     employee_id = models.CharField(max_length=16,null=True,unique=True)

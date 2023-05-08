@@ -9,6 +9,7 @@ from .serializers import *
 from .models import *
 
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def databaseCreation(request):
     data = {}
     database = DatabaseSerializers(data=request.data)
@@ -22,6 +23,7 @@ def databaseCreation(request):
         return Response(data,status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def Products(request):
     data = {}
     product_serializer = ProductsSerializers(data=request.data)
@@ -35,10 +37,11 @@ def Products(request):
         return Response(data="Error",status=status.HTTP_400_BAD_REQUEST)
     
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def getProductDatabases(request):
     data = {}
-    db = ProductDatabase.objects.get(id=request.user.establishment)
-    if db.employees.filter(employee=request.user.employee_id).exists and request.user.is_authenticated:
+    db = ProductDatabase.objects.prefetch_related('employees','products').get(id=request.user.establishment)
+    if db.employees.prefetch_related('employees','products').filter(employee=request.user.employee_id).exists and request.user.is_authenticated:
         data = GetProductsSerializers(db.products,many=True).data
         return Response(data,status=status.HTTP_200_OK)
     else:
@@ -64,11 +67,11 @@ def importExcel(request):
 def addProducts(request):
     data = {}
     product_serializers = ProductsSerializers(data=request.data)
-    db = ProductDatabase.objects.get(id=request.user.establishment)
+    db = ProductDatabase.objects.prefetch_related('employees','products').get(id=request.user.establishment)
     
     if product_serializers.is_valid():
         product_serializers.save()
-        if db.employees.filter(employee=request.user.employee_id).exists:
+        if db.employees.prefetch_related('employees','products').filter(employee=request.user.employee_id).exists:
           new_product = Product.objects.get(item_number = product_serializers.data['item_number'])
           db.products.add(new_product)
           db.save()
@@ -81,8 +84,27 @@ def addProducts(request):
         data = product_serializers.errors
         return Response(data,status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def getProductCount(request):
+    data = {}
+    count = []
+    db = ProductDatabase.objects.prefetch_related('employees','products').get(id=request.user.establishment)
+    if db.employees.prefetch_related('employees','products').filter(employee=request.user.employee_id).exists:
+        for item in db.products.all():
+            count.append(item.item_name)
+        for product in count:
+            if count.count(product) < 10:
+               data = product
+        alert = Alert.objects.create(
+                  message = f"Product 10 {product} are remaining. Restock is advised." 
+               )
+        return Response(data,status=status.HTTP_200_OK)
+    else:
+        data = "Access unauthorized"
+        return Response(data,status=status.HTTP_401_UNAUTHORIZED)
 
         
-        
+
         
 

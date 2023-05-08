@@ -14,15 +14,18 @@ def registration_view(request):
     admin_serializer = AdminRegistrationSerializer(data=request.data)
     data = {}
 
-    if serializer.is_valid() and admin_serializer.is_valid():
-        if request.user.is_authenticated:
-           account = serializer.save(request=request)
-        else:
-           account = admin_serializer.save()  
+    if admin_serializer.is_valid():
+        account = admin_serializer.save()  
         data['response'] = f"Successfully created a new user under {account.username} with email {account.email}"
         return Response(data,status = status.HTTP_201_CREATED)
+    elif serializer.is_valid():
+         if request.user.is_authenticated:
+            account = serializer.save(request)
+            data['response'] = f"Successfully created a new user under {account.username} with email {account.email}"
+            return Response(data,status = status.HTTP_201_CREATED)
     else:
         data = serializer.errors
+        print(serializer.errors)
         return Response(data,status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
@@ -30,6 +33,6 @@ def registration_view(request):
 def get_profile(request):
 
     data = {}
-    profile = Profile.objects.get(user=request.user)
+    profile = Profile.objects.select_related('user').get(user=request.user)
     data =  ProfileSerializer(profile).data
     return Response(data,status = status.HTTP_200_OK)

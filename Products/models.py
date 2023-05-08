@@ -17,7 +17,13 @@ class Employees(models.Model):
 class ProductDatabase(models.Model):
     establishment = models.CharField(max_length=100,null=True)
     employees = models.ManyToManyField(Employees)
-    products = models.ManyToManyField(Product,null=True)
+    products = models.ManyToManyField(Product)
 
     def __str__(self):
         return self.establishment
+    
+class Alert(models.Model):
+    message = models.TextField(null=True)
+
+    def __str__(self):
+        return str(self.id)

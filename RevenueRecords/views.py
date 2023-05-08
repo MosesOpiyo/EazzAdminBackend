@@ -17,9 +17,9 @@ def RecordView(request,id):
 
     my_date = date.today() 
     year, week_num, day_of_week = my_date.isocalendar()
-    receipt = Receipt.objects.get(id=id)
+    receipt = Receipt.objects.select_related('items').get(id=id)
     admin = Account.objects.get(employee_id=request.user.admin)
-    records = RevenueRecord.objects.all()
+    records = RevenueRecord.objects.select_related('account').all()
     for record in records:
         if record.account == admin and record.week == week_num:
             record.amount = record.amount + receipt.total
@@ -31,7 +31,7 @@ def RecordView(request,id):
             return Response(data,status=status.HTTP_200_OK) 
         
     new_record = RevenueRecord.objects.create(account=admin,week=week_num,amount=0)
-    entry_receipt = Receipt.objects.get(id=id)
+    entry_receipt = Receipt.objects.prefetch_related('items').get(id=id)
     new_record.amount = 0 + entry_receipt.total
     new_record.save()
     data = GetRecordSerializer(new_record).data
@@ -42,7 +42,7 @@ def RecordView(request,id):
 def get_all_record(request):
     
     admin = Account.objects.get(id=request.user.id)
-    record = RevenueRecord.objects.filter(account=admin)
+    record = RevenueRecord.objects.select_related('account').filter(account=admin)
     data =  GetRecordSerializer(record,many=True).data
     return Response(data,status = status.HTTP_200_OK)
             
@@ -54,7 +54,7 @@ def get_record(request):
     my_date = date.today() 
     year, week_num, day_of_week = my_date.isocalendar()
     admin = Account.objects.get(id=request.user.id)
-    record = RevenueRecord.objects.get(account=admin, week=week_num - 1)
+    record = RevenueRecord.objects.select_related('account').get(account=admin, week=week_num - 1)
     data =  GetRecordSerializer(record).data
     return Response(data,status = status.HTTP_200_OK)
      
@@ -65,10 +65,10 @@ def increase_or_decrease(request):
 
     data = {}
     admin = Account.objects.get(id=request.user.id)
-    prev_record = RevenueRecord.objects.get(account=admin, week=week_num - 1)
+    prev_record = RevenueRecord.objects.select_related('account').get(account=admin, week=week_num - 1)
     prev_record.percent = None
     prev_record.save
-    current_record = RevenueRecord.objects.get(account=admin, week=week_num)
+    current_record = RevenueRecord.objects.select_related('account').get(account=admin, week=week_num)
     if current_record.amount > prev_record.amount:
         increase = current_record.amount - prev_record.amount
         percentage_increase = (increase / prev_record.amount)
@@ -86,6 +86,7 @@ def increase_or_decrease(request):
         data = GetRecordSerializer(prev_record).data
         return Response(data,status=status.HTTP_200_OK)
     
+    
 @api_view(["GET"])
 def increase_or_decrease_for_employee(request):
     my_date = date.today()  
@@ -93,10 +94,10 @@ def increase_or_decrease_for_employee(request):
 
     data = {}
     admin = Account.objects.get(employee_id=request.user.admin)
-    prev_record = RevenueRecord.objects.get(account=admin, week=week_num - 1)
+    prev_record = RevenueRecord.objects.select_related('account').get(account=admin, week=week_num - 1)
     prev_record.percent = None
     prev_record.save
-    current_record = RevenueRecord.objects.get(account=admin, week=week_num)
+    current_record = RevenueRecord.objects.select_related('account').get(account=admin, week=week_num)
     if current_record.amount > prev_record.amount:
         increase = current_record.amount - prev_record.amount
         percentage_increase = (increase / prev_record.amount)

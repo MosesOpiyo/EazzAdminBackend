@@ -24,7 +24,7 @@ class ReceiptSerializers(serializers.ModelSerializer):
     items = ItemsSerializers(many=True)
     class Meta:
         model = Receipt
-        fields = '__all__'
+        fields = ['id','receipt_number','server','server_name','total','items']
 
     def create(request,validated_data):
         item_data = validated_data.pop('items')
@@ -50,4 +50,4 @@ class GetReceiptSerializers(serializers.ModelSerializer):
     items = GetItemsSerializers(many=True)
     class Meta:
         model = Receipt
-        fields = ['receipt_number','store_name','server_name','total','items']
+        fields = ['receipt_number','store_name','server','server_name','total','items']

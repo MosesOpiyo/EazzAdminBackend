@@ -14,17 +14,18 @@ from .models import *
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def getProduct(request,id,number):
-    db = ProductDatabase.objects.get(id=request.user.establishment)
+    db = ProductDatabase.objects.prefetch_related('employees','products').get(id=request.user.establishment)
     
-    if db.employees.filter(employee=request.user.employee_id).exists:
-        product = db.products.get(item_number=number)
-        receipt = Receipt.objects.get(id=id)
+    if db.employees.prefetch_related('employees','products').filter(employee=request.user.employee_id).exists:
+        product = db.products.prefetch_related('employees','products').get(item_number=number)
+        receipt = Receipt.objects.prefetch_related('items').get(id=id)
         item = Item.objects.create(
             item_number = product.item_number,
             name = product.item_name,
             price = product.item_price
         )
-        receipt.items.add(item)
+        db.products.prefetch_related('employees','products').remove(product)
+        receipt.items.prefetch_related('items').add(item)
         receipt_items = receipt.items
         data = GetItemsSerializers(receipt_items,many=True).data
         return Response(data,status=status.HTTP_200_OK)
@@ -37,7 +38,7 @@ def getProduct(request,id,number):
 def GetReceipt(request,id):
     data = {}
 
-    receipt = Receipt.objects.get(id=id)
+    receipt = Receipt.objects.prefetch_related('items').get(id=id)
     data = GetReceiptSerializers(receipt).data
     return Response(data,status=status.HTTP_200_OK)
 
@@ -46,7 +47,7 @@ def GetReceipt(request,id):
 def GetEmployeeReceipts(request):
     data = {}
 
-    receipt = Receipt.objects.filter(server=request.user.server_code,server_name=request.user.username)
+    receipt = Receipt.objects.prefetch_related('items').filter(server=request.user.server_code,server_name=request.user.username).only('id','receipt_number','server','server_name','total','items')
     data = GetReceiptSerializers(receipt,many=True).data
     return Response(data,status=status.HTTP_200_OK)
 
@@ -55,7 +56,7 @@ def GetEmployeeReceipts(request):
 def GetEmployeeLatest(request):
     data = {}
 
-    receipt = Receipt.objects.filter(overseer=request.user.employee_id).latest('id')
+    receipt = Receipt.objects.prefetch_related('items').filter(overseer=request.user.employee_id).latest('id')
     data = GetReceiptSerializers(receipt).data
     return Response(data,status=status.HTTP_200_OK)
 
@@ -65,7 +66,7 @@ def GetEmployeeLatest(request):
 def GetEmployeeLatestReceipt(request):
     data = {}
 
-    receipt = Receipt.objects.filter(overseer=request.user.employee_id).latest('id')
+    receipt = Receipt.objects.prefetch_related('items').filter(overseer=request.user.employee_id).latest('id')
     data = GetReceiptSerializers(receipt).data
     return Response(data,status=status.HTTP_200_OK)
 
@@ -75,7 +76,7 @@ def ReceiptView(request):
     data = {}
 
     my_date = date.today()
-    store = ProductDatabase.objects.get(id=request.user.establishment)
+    store = ProductDatabase.objects.prefetch_related('employees','products').get(id=request.user.establishment)
     year, week_num, day_of_week = my_date.isocalendar()
     receipt = Receipt.objects.create(
         server = request.user.server_code,
@@ -96,7 +97,7 @@ def NewReceipt(request,id):
     my_date = date.today()
     year, week_num, day_of_week = my_date.isocalendar()
    
-    receipt = Receipt.objects.get(id=id) 
+    receipt = Receipt.objects.prefetch_related('items').get(id=id) 
     for item in receipt.items.all():
         total.append(item.price)
     receipt.total = sum(total)
@@ -108,7 +109,7 @@ def NewReceipt(request,id):
 @permission_classes([IsAuthenticated])
 def EmployeeSales(request,id):
     employee = Account.objects.get(id=request.user.id)
-    receipt = Receipt.objects.get(id=id)
+    receipt = Receipt.objects.prefetch_related('items').get(id=id)
     employee.customers = employee.customers + 1
     prev_sales = employee.sales
     new_sales = prev_sales + receipt.total
@@ -121,7 +122,7 @@ def EmployeeSales(request,id):
 def CheckReceipt(request):
     my_date = date.today()
     year, week_num, day_of_week = my_date.isocalendar()
-    receipts = Receipt.objects.filter(server=request.user.server_code)
+    receipts = Receipt.objects.prefetch_related('items').filter(server=request.user.server_code)
     for receipt in receipts:
         if receipt.week != week_num:
             account = Account.objects.get(id=request.user.id)
