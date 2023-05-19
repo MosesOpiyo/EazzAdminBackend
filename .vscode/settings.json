@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/384ea48d-13ed-4c2a-917c-774d3b0f7d3a/resourceGroups/Eazz-Admin-Api_group-bec3/providers/Microsoft.Web/sites/Eazz-Admin-Api",
+    "appService.deploySubpath": "."
+}
