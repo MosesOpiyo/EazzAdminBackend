@@ -28,6 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['eazz-admin-api.azurewebsites.net']
 
+CSRF_TRUSTED_ORIGINS = ['eazz-admin-api.azurewebsites.net']
 
 # Application definition
 
