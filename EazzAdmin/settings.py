@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-om*x#9p^g$mhu#if10ndj_9qa(827=qm=&3893p&o=-t^z8sz-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['eazz-admin-api.azurewebsites.net']
+ALLOWED_HOSTS = ['https://eazz-admin-api.azurewebsites.net']
 
 
 # Application definition
@@ -102,8 +102,15 @@ REST_FRAMEWORK = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DB_NAME'), 
+        'USER': config('DB_USERNAME'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_SERVER'), 
+        'PORT': '5432',
+        'OPTIONS':{
+            'sslmode': 'require'
+        },
     }
 }
 
