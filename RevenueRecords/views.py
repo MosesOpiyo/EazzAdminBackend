@@ -17,7 +17,7 @@ def RecordView(request,id):
 
     my_date = date.today() 
     year, week_num, day_of_week = my_date.isocalendar()
-    receipt = Receipt.objects.select_related('items').get(id=id)
+    receipt = Receipt.objects.get(id=id)
     admin = Account.objects.get(employee_id=request.user.admin)
     records = RevenueRecord.objects.select_related('account').all()
     for record in records:
@@ -55,8 +55,12 @@ def get_record(request):
     year, week_num, day_of_week = my_date.isocalendar()
     admin = Account.objects.get(id=request.user.id)
     record = RevenueRecord.objects.select_related('account').get(account=admin, week=week_num - 1)
-    data =  GetRecordSerializer(record).data
-    return Response(data,status = status.HTTP_200_OK)
+    if record:
+        data =  GetRecordSerializer(record).data
+        return Response(data,status = status.HTTP_200_OK)
+    else:
+        data = "No Record Provided"
+        return Response(data,status=status.HTTP_204_NO_CONTENT)
      
 @api_view(["GET"])
 def increase_or_decrease(request):
@@ -68,23 +72,27 @@ def increase_or_decrease(request):
     prev_record = RevenueRecord.objects.select_related('account').get(account=admin, week=week_num - 1)
     prev_record.percent = None
     prev_record.save
-    current_record = RevenueRecord.objects.select_related('account').get(account=admin, week=week_num)
-    if current_record.amount > prev_record.amount:
-        increase = current_record.amount - prev_record.amount
-        percentage_increase = (increase / prev_record.amount)
-        prev_record.increased = False
-        prev_record.percent = percentage_increase * 100
-        prev_record.save()
-        data = GetRecordSerializer(prev_record).data
-        return Response(data,status=status.HTTP_200_OK)
-    else:
-        decrease = prev_record.amount - current_record.amount
-        percentage_decrease = (decrease / prev_record.amount)
-        prev_record.increased = True
-        prev_record.percent = percentage_decrease * 100
-        prev_record.save()
-        data = GetRecordSerializer(prev_record).data
-        return Response(data,status=status.HTTP_200_OK)
+    try:
+        current_record = RevenueRecord.objects.select_related('account').get(account=admin, week=week_num)
+        if current_record.amount > prev_record.amount:
+            increase = current_record.amount - prev_record.amount
+            percentage_increase = (increase / prev_record.amount)
+            prev_record.increased = False
+            prev_record.percent = percentage_increase * 100
+            prev_record.save()
+            data = GetRecordSerializer(prev_record).data
+            return Response(data,status=status.HTTP_200_OK)
+        else:
+            decrease = prev_record.amount - current_record.amount
+            percentage_decrease = (decrease / prev_record.amount)
+            prev_record.increased = True
+            prev_record.percent = percentage_decrease * 100
+            prev_record.save()
+            data = GetRecordSerializer(prev_record).data
+            return Response(data,status=status.HTTP_200_OK)
+    except:
+        data = "No Record Provided."
+        return Response(data,status=status.HTTP_204_NO_CONTENT)
     
     
 @api_view(["GET"])
@@ -94,28 +102,31 @@ def increase_or_decrease_for_employee(request):
 
     data = {}
     admin = Account.objects.get(employee_id=request.user.admin)
-    prev_record = RevenueRecord.objects.select_related('account').get(account=admin, week=week_num - 1)
-    prev_record.percent = None
-    prev_record.save
-    current_record = RevenueRecord.objects.select_related('account').get(account=admin, week=week_num)
-    if current_record.amount > prev_record.amount:
-        increase = current_record.amount - prev_record.amount
-        percentage_increase = (increase / prev_record.amount)
-        prev_record.increased = False
-        prev_record.percent = percentage_increase * 100
-        prev_record.save()
-        data = GetRecordSerializer(prev_record).data
-        return Response(data,status=status.HTTP_200_OK)
-    else:
-        decrease = prev_record.amount - current_record.amount
-        percentage_decrease = (decrease / prev_record.amount)
-        prev_record.increased = True
-        prev_record.percent = percentage_decrease * 100
-        prev_record.save()
-        data = GetRecordSerializer(prev_record).data
-        return Response(data,status=status.HTTP_200_OK)
     
-
+    try:
+        prev_record = RevenueRecord.objects.select_related('account').get(account=admin, week=week_num - 1)
+        prev_record.percent = None
+        prev_record.save
+        current_record = RevenueRecord.objects.select_related('account').get(account=admin, week=week_num)
+        if current_record.amount > prev_record.amount:
+            increase = current_record.amount - prev_record.amount
+            percentage_increase = (increase / prev_record.amount)
+            prev_record.increased = False
+            prev_record.percent = percentage_increase * 100
+            prev_record.save()
+            data = GetRecordSerializer(prev_record).data
+            return Response(data,status=status.HTTP_200_OK)
+        else:
+            decrease = prev_record.amount - current_record.amount
+            percentage_decrease = (decrease / prev_record.amount)
+            prev_record.increased = True
+            prev_record.percent = percentage_decrease * 100
+            prev_record.save()
+            data = GetRecordSerializer(prev_record).data
+            return Response(data,status=status.HTTP_200_OK)
+    except:
+        data = "No Record Provided."
+        return Response(data,status=status.HTTP_204_NO_CONTENT)
 
     
 

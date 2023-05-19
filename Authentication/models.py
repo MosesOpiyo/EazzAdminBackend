@@ -43,6 +43,7 @@ class Account(AbstractBaseUser,PermissionsMixin):
     server_code = models.CharField(max_length=20,null=True)
     establishment = models.CharField(max_length=10,null=True)
     confirm_start_shift = models.BooleanField(default=False) 
+    till_number = models.CharField(max_length=6,null=True)
     on_shift = models.BooleanField(default=False)
     customers = models.IntegerField(null=True)
     sales = models.IntegerField(null=True)

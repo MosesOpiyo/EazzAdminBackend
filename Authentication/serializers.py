@@ -46,8 +46,12 @@ class AdminRegistrationSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
-        fields = ['id','email','username','establishment','sales','customers','is_company_admin','confirm_start_shift','confirm_end_shift','employee_id','date_joined','last_login']
+        fields = ['id','email','username','establishment','sales','till_number','customers','is_company_admin','employee_id']
 
+class TillSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = ['till_number']
 
 class ProfileSerializer(serializers.Serializer):
     user = UserSerializer(read_only=True)

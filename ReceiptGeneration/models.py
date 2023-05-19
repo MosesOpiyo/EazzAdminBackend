@@ -22,11 +22,12 @@ class Receipt(models.Model):
     store_name = models.CharField(max_length=100,null=True)
     server = models.CharField(max_length=20,null=True)
     server_name = models.CharField(max_length=40,null=True)
+    till_number = models.CharField(null=True,max_length=8)
     items = models.ManyToManyField(Item)
     sub_total = models.IntegerField(null=True)
     overseer = models.CharField(max_length=20,null=True)
     VAT = models.IntegerField(null=True)
-    total = models.IntegerField(null=True)
+    total = models.IntegerField(default=0)
     day = models.IntegerField(null=True)
     week = models.IntegerField(null=True)
 

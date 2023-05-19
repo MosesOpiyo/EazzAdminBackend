@@ -17,15 +17,15 @@ def getProduct(request,id,number):
     db = ProductDatabase.objects.prefetch_related('employees','products').get(id=request.user.establishment)
     
     if db.employees.prefetch_related('employees','products').filter(employee=request.user.employee_id).exists:
-        product = db.products.prefetch_related('employees','products').get(item_number=number)
+        product = db.products.get(item_number=number)
         receipt = Receipt.objects.prefetch_related('items').get(id=id)
         item = Item.objects.create(
             item_number = product.item_number,
             name = product.item_name,
             price = product.item_price
         )
-        db.products.prefetch_related('employees','products').remove(product)
-        receipt.items.prefetch_related('items').add(item)
+
+        receipt.items.add(item)
         receipt_items = receipt.items
         data = GetItemsSerializers(receipt_items,many=True).data
         return Response(data,status=status.HTTP_200_OK)
@@ -46,10 +46,13 @@ def GetReceipt(request,id):
 @permission_classes([IsAuthenticated])
 def GetEmployeeReceipts(request):
     data = {}
-
     receipt = Receipt.objects.prefetch_related('items').filter(server=request.user.server_code,server_name=request.user.username).only('id','receipt_number','server','server_name','total','items')
-    data = GetReceiptSerializers(receipt,many=True).data
-    return Response(data,status=status.HTTP_200_OK)
+    if receipt:
+        data = GetReceiptSerializers(receipt,many=True).data
+        return Response(data,status=status.HTTP_200_OK)
+    else:
+        data = "No receipts Found"
+        return Response(data,status=status.HTTP_404_NOT_FOUND)
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -65,10 +68,13 @@ def GetEmployeeLatest(request):
 @permission_classes([IsAuthenticated])
 def GetEmployeeLatestReceipt(request):
     data = {}
-
-    receipt = Receipt.objects.prefetch_related('items').filter(overseer=request.user.employee_id).latest('id')
-    data = GetReceiptSerializers(receipt).data
-    return Response(data,status=status.HTTP_200_OK)
+    try:
+        receipt = Receipt.objects.prefetch_related('items').filter(server=request.user.server_code).latest('id')
+        data = GetReceiptSerializers(receipt).data
+        return Response(data,status=status.HTTP_200_OK)
+    except:
+        data = "No receipts found"
+        return Response(data,status=status.HTTP_204_NO_CONTENT)
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -81,6 +87,7 @@ def ReceiptView(request):
     receipt = Receipt.objects.create(
         server = request.user.server_code,
         server_name = request.user.username,
+        till_number = request.user.till_number,
         store_name = store.establishment,
         overseer = request.user.admin,
         day = day_of_week,

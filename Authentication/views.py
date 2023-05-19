@@ -49,3 +49,15 @@ def get_profile(request):
     profile = Profile.objects.select_related('user').get(user=request.user)
     data =  ProfileSerializer(profile).data
     return Response(data,status = status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def till_number_view(request,till):
+    
+    data = {}
+    account = Account.objects.only('till_number').get(id=request.user.id)
+    account.till_number = till
+    account.save()
+    data = f'Till {account.till_number} successfully added'
+    return Response(data,status=status.HTTP_200_OK)
