@@ -19,23 +19,22 @@ def RecordView(request,id):
     year, week_num, day_of_week = my_date.isocalendar()
     receipt = Receipt.objects.get(id=id)
     admin = Account.objects.get(employee_id=request.user.admin)
-    records = RevenueRecord.objects.select_related('account').all()
-    for record in records:
-        if record.account == admin and record.week == week_num:
-            record.amount = record.amount + receipt.total
-            record.increase = 0
-            increase = (receipt.total / record.amount)
-            record.increase = increase * 100
-            record.save()
-            data =  GetRecordSerializer(record).data
-            return Response(data,status=status.HTTP_200_OK) 
-        
-    new_record = RevenueRecord.objects.create(account=admin,week=week_num,amount=0)
-    entry_receipt = Receipt.objects.prefetch_related('items').get(id=id)
-    new_record.amount = 0 + entry_receipt.total
-    new_record.save()
-    data = GetRecordSerializer(new_record).data
-    return Response(data,status=status.HTTP_201_CREATED) 
+    try:
+        record = RevenueRecord.objects.select_related('account').filter(account=admin,week=week_num)
+        record.amount = record.amount + receipt.total
+        record.increase = 0
+        increase = (receipt.total / record.amount)
+        record.increase = increase * 100
+        record.save()
+        data =  GetRecordSerializer(record).data
+        return Response(data,status=status.HTTP_200_OK) 
+    except:
+        new_record = RevenueRecord.objects.create(account=admin,week=week_num,amount=0)
+        entry_receipt = Receipt.objects.prefetch_related('items').get(id=id)
+        new_record.amount = 0 + entry_receipt.total
+        new_record.save()
+        data = GetRecordSerializer(new_record).data
+        return Response(data,status=status.HTTP_201_CREATED) 
     
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
