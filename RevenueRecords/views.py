@@ -19,8 +19,8 @@ def RecordView(request,id):
     year, week_num, day_of_week = my_date.isocalendar()
     receipt = Receipt.objects.get(id=id)
     admin = Account.objects.get(employee_id=request.user.admin)
-    try:
-        record = RevenueRecord.objects.select_related('account').filter(account=admin,week=week_num)
+    record = RevenueRecord.objects.select_related('account').filter(account=admin,week=week_num)
+    try:  
         record.amount = record.amount + receipt.total
         record.increase = 0
         increase = (receipt.total / record.amount)
