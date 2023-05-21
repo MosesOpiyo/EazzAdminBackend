@@ -53,11 +53,11 @@ def get_record(request):
     my_date = date.today() 
     year, week_num, day_of_week = my_date.isocalendar()
     admin = Account.objects.get(id=request.user.id)
-    record = RevenueRecord.objects.select_related('account').get(account=admin, week=week_num - 1)
-    if record:
+    try:
+        record = RevenueRecord.objects.select_related('account').get(account=admin, week=week_num - 1)
         data =  GetRecordSerializer(record).data
         return Response(data,status = status.HTTP_200_OK)
-    else:
+    except:
         data = "No Record Provided"
         return Response(data,status=status.HTTP_204_NO_CONTENT)
      
