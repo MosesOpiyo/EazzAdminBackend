@@ -107,9 +107,9 @@ def NewReceipt(request,id):
     receipt = Receipt.objects.prefetch_related('items').get(id=id) 
     for item in receipt.items.all():
         total.append(item.price)
-    receipt.total = sum(total)
-    receipt.VAT = receipt.total * 0.16
-    receipt.sub_total = receipt.total - receipt.VAT
+    receipt.sub_total = sum(total)
+    receipt.VAT = receipt.sub_total * 0.16
+    receipt.total = receipt.sub_total + receipt.VAT
     receipt.save()
     data = GetReceiptSerializers(receipt).data
     return Response(data,status=status.HTTP_201_CREATED)
