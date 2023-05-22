@@ -19,8 +19,8 @@ def RecordView(request,id):
     year, week_num, day_of_week = my_date.isocalendar()
     receipt = Receipt.objects.get(id=id)
     admin = Account.objects.get(employee_id=request.user.admin)
-    record = RevenueRecord.objects.select_related('account').filter(account=admin,week=week_num)
-    if record: 
+    record = RevenueRecord.objects.select_related('account').get(account=admin,week=week_num)
+    try: 
         record.amount = record.amount + receipt.total
         record.increase = 0
         increase = (receipt.total / record.amount)
@@ -28,8 +28,8 @@ def RecordView(request,id):
         record.save()
         data =  GetRecordSerializer(record).data
         return Response(data,status=status.HTTP_200_OK) 
-    else:
-        new_record = RevenueRecord.objects.create(account=admin,week=week_num,amount=0)
+    except record.DoesNotExist:
+        new_record = RevenueRecord(account=admin,week=week_num,amount=0)
         entry_receipt = Receipt.objects.prefetch_related('items').get(id=id)
         new_record.amount = 0 + entry_receipt.total
         new_record.save()
