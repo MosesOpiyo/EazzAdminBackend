@@ -101,11 +101,11 @@ def increase_or_decrease_for_employee(request):
 
     data = {}
     admin = Account.objects.get(employee_id=request.user.admin)
-    
+
+    prev_record = RevenueRecord.objects.select_related('account').get(account=admin, week=week_num - 1)
+    prev_record.percent = None
+    prev_record.save
     try:
-        prev_record = RevenueRecord.objects.select_related('account').get(account=admin, week=week_num - 1)
-        prev_record.percent = None
-        prev_record.save
         current_record = RevenueRecord.objects.select_related('account').get(account=admin, week=week_num)
         if current_record.amount > prev_record.amount:
             increase = current_record.amount - prev_record.amount
