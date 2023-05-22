@@ -110,6 +110,7 @@ def increase_or_decrease_for_employee(request):
         if current_record.amount > prev_record.amount:
             increase = current_record.amount - prev_record.amount
             percentage_increase = (increase / prev_record.amount)
+            prev_record.percent = 0
             prev_record.increased = False
             prev_record.percent = percentage_increase * 100
             prev_record.save()

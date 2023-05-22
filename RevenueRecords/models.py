@@ -4,7 +4,7 @@ from Authentication.models import Account
 class RevenueRecord(models.Model):
     account = models.ForeignKey(Account,on_delete=models.CASCADE)
     week = models.IntegerField(null=True)
-    amount = models.IntegerField(null=True)
+    amount = models.IntegerField(null=True,default=0)
     percent = models.IntegerField(null=True)
     increased = models.BooleanField(default=False)
 
