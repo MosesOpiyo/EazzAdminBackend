@@ -26,9 +26,9 @@ SECRET_KEY = 'django-insecure-om*x#9p^g$mhu#if10ndj_9qa(827=qm=&3893p&o=-t^z8sz-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['eazz-admin-api.azurewebsites.net']
+ALLOWED_HOSTS = [config('CORS_ACCESS')]
 
-CSRF_TRUSTED_ORIGINS = ['https://eazz-admin-api.azurewebsites.net']
+CSRF_TRUSTED_ORIGINS = [config('CSRF_ACCESS')]
 
 # Application definition
 
